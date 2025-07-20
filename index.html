@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>Untitled</title>
+  
+
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>AxiomAI Voice - Text to Speech</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+
+    body {
+      margin: 0;
+      height: 100vh;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Inter', sans-serif;
+      color: #eee;
+      overflow: hidden;
+    }
+
+    h1 {
+      margin-bottom: 40px;
+      font-weight: 700;
+      font-size: 2.5rem;
+      text-align: center;
+      letter-spacing: 1.5px;
+      text-shadow: 0 0 10px #00ccffaa;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 350px;
+      max-width: 90vw;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 15px 20px;
+      border-radius: 30px;
+      border: none;
+      font-size: 1.1rem;
+      outline: none;
+      box-shadow: 0 0 15px #00ccff44 inset;
+      background: #122f44;
+      color: #d0f0ff;
+      margin-bottom: 40px;
+      transition: box-shadow 0.3s ease;
+    }
+
+    input[type="text"]:focus {
+      box-shadow: 0 0 25px #00ccffcc inset;
+    }
+
+    .circle-btn {
+      position: relative;
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      background: radial-gradient(circle at center, #00ccff, #0077aa);
+      box-shadow:
+        0 0 10px #00ccff88,
+        0 0 20px #00ccffbb,
+        0 0 40px #00ccffee;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: box-shadow 0.3s ease;
+      user-select: none;
+      overflow: visible;
+    }
+
+    .circle-btn:hover {
+      box-shadow:
+        0 0 15px #00ddffcc,
+        0 0 35px #00ddffee,
+        0 0 60px #00ddffff;
+    }
+
+    .circle-btn:active {
+      transform: scale(0.9);
+    }
+
+    .circle-btn .inner-circle {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: #003d66;
+      box-shadow: inset 0 0 10px #00ccff99;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #00ccff;
+      font-size: 3rem;
+      font-weight: 700;
+      text-shadow: 0 0 6px #00ccffbb;
+      user-select: none;
+    }
+
+    /* Pulsing animation for active state */
+    .circle-btn.active {
+      animation: pulse 2s infinite;
+      box-shadow:
+        0 0 30px #00ccffcc,
+        0 0 50px #00ccffee,
+        0 0 80px #00ccffff;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        box-shadow:
+          0 0 30px #00ccffcc,
+          0 0 50px #00ccffee,
+          0 0 80px #00ccffff;
+      }
+
+      50% {
+        box-shadow:
+          0 0 60px #00ccffcc,
+          0 0 90px #00ccffee,
+          0 0 120px #00ccffff;
+      }
+    }
+
+    audio {
+      margin-top: 40px;
+      width: 100%;
+      outline: none;
+      border-radius: 10px;
+      background: #122f44;
+      box-shadow: 0 0 20px #00ccff88;
+    }
+
+    @media (max-width: 400px) {
+      .circle-btn {
+        width: 110px;
+        height: 110px;
+      }
+
+      .circle-btn .inner-circle {
+        width: 70px;
+        height: 70px;
+        font-size: 2.5rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <h1>AxiomAI Voice - Text to Speech</h1>
+  <div class="container">
+    <input id="textInput" type="text" placeholder="Type your text here..." autocomplete="off" />
+    <button class="circle-btn" id="speakBtn" aria-label="Speak">
+      <div class="inner-circle">🎤</div>
+    </button>
+    <audio id="audioPlayer" controls></audio>
+  </div>
+
+  <script>
+    const API_KEY = 'sk_a36c0a7d006d28b4ef761ba55d9ebf2cdbd9f12d7da4517d'; // Replace with your ElevenLabs API key
+    const VOICE_ID = '21m00Tcm4TlvDq8ikWAM'; // Default voice
+    const speakBtn = document.getElementById('speakBtn');
+    const textInput = document.getElementById('textInput');
+    const audioPlayer = document.getElementById('audioPlayer');
+    speakBtn.addEventListener('click', async () => {
+      const text = textInput.value.trim();
+      if (!text) {
+        alert('Please enter some text!');
+        return;
+      }
+      speakBtn.classList.add('active');
+      audioPlayer.src = '';
+      audioPlayer.pause();
+      try {
+        const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${VOICE_ID}`, {
+          method: 'POST',
+          headers: {
+            'xi-api-key': API_KEY,
+            'Content-Type': 'application/json',
+            'Accept': 'audio/mpeg'
+          },
+          body: JSON.stringify({
+            text,
+            voice_settings: {
+              stability: 0.75,
+              similarity_boost: 0.75
+            }
+          })
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const audioBlob = await response.blob();
+        const audioUrl = URL.createObjectURL(audioBlob);
+        audioPlayer.src = audioUrl;
+        audioPlayer.play();
+      } catch (err) {
+        alert('Error: ' + err.message);
+      } finally {
+        speakBtn.classList.remove('active');
+      }
+    });
+  </script>
+
+</body>
+
+</html>
+<!-- partial -->
+  
+</body>
+</html>
